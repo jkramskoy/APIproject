@@ -24,7 +24,16 @@ namespace Restaurants
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
+
         {
+            services.AddSwaggerGen
+             (
+                c =>
+                c.SwaggerDoc("v1",new Microsoft.OpenApi.Models.OpenApiInfo {
+                    Version = "v1",
+                    Title = "Restaurant API Help"
+                })
+              );
             services.AddControllers();
         }
 
@@ -41,6 +50,17 @@ namespace Restaurants
             app.UseRouting();
 
             app.UseAuthorization();
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Test API");
+                c.RoutePrefix = string.Empty;
+
+            });
+
 
             app.UseEndpoints(endpoints =>
             {

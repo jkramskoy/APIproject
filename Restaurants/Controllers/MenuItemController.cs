@@ -14,6 +14,7 @@ namespace Restaurants.Controllers
     public class MenuItemController : ControllerBase
     {
         private readonly AppDbContext _context = new AppDbContext();
+
         // GET: api/MenuItem
         [HttpGet]
         public IEnumerable<MenuItem> Get()
@@ -24,27 +25,42 @@ namespace Restaurants.Controllers
 
         // GET: api/MenuItem/5
         [HttpGet("{id}", Name = "Get")]
-        public string Get(int id)
+        public MenuItem Get(int id)
         {
-            return "value";
+            return _context.MenuItems.Find(id);
         }
 
-        // POST: api/MenuItem
+        // POST: api/MenuItem  //CREATE NEW ITEM
         [HttpPost]
-        public void Post([FromBody] string value)
+        public void Post([FromBody] MenuItem value)
         {
+            value.Id = _context.MenuItems.AsEnumerable().Last().Id + 1;
+            _context.MenuItems.Add(value);
+            _context.SaveChanges();
         }
 
-        // PUT: api/MenuItem/5
+        // PUT: api/MenuItem/5  // CHANGE SOMETHING
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public void Put(int id, [FromBody] MenuItem value)
         {
+            MenuItem mi = _context.MenuItems.Where(m => m.Id == id).FirstOrDefault(); // find menuItem by ID
+
+            if (mi!=null)
+            {
+                mi.Name = value.Name;
+                mi.Price = value.Price;
+                _context.SaveChanges();
+
+            }
         }
 
         // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
+            MenuItem mi = _context.MenuItems.Find(id);   //find menuItem by ID
+            _context.MenuItems.Remove(mi);
+            _context.SaveChanges();
         }
     }
 }
