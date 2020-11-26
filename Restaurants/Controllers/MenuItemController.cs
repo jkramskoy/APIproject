@@ -4,8 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Restaurants.Data;
 using Restaurants.Model;
+
+//implementation Swager and Logger
 
 namespace Restaurants.Controllers
 {
@@ -14,11 +17,25 @@ namespace Restaurants.Controllers
     public class MenuItemController : ControllerBase
     {
         private readonly AppDbContext _context = new AppDbContext();
+        private readonly ILogger<MenuItemController> _logger;
+
+        public MenuItemController(ILogger<MenuItemController> logger)
+        {
+            _logger = logger;
+        }
 
         // GET: api/MenuItem
         [HttpGet]
         public IEnumerable<MenuItem> Get()
         {
+            
+            _logger.LogInformation("The Get MenuItem was invoked!");
+            
+            _logger.LogWarning("This is Warning!");
+            /*
+            _logger.LogError("This is Error");
+            _logger.LogCritical("This is something critical!!!");
+           */
             return _context.MenuItems.ToList();
 
         }
