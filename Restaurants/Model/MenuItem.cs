@@ -1,5 +1,6 @@
 ﻿using System;
-
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Restaurants.Model
 {
@@ -9,11 +10,14 @@ namespace Restaurants.Model
         {
         }
 
-        public int Id { get; set; }
+        [Key]
+        public int MenuItemId { get; set; }
         public string Name { get; set; }
         public double Price { get; set; }
-        
-       
+
+        public List<MenuReservation> ReservationList { get; set; }
+
+
 
     }
 }

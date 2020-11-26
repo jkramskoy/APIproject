@@ -41,7 +41,7 @@ namespace Restaurants.Controllers
         }
 
         // GET: api/MenuItem/5
-        [HttpGet("{id}", Name = "Get")]
+        [HttpGet("{id}")]
         public MenuItem Get(int id)
         {
             return _context.MenuItems.Find(id);
@@ -51,7 +51,7 @@ namespace Restaurants.Controllers
         [HttpPost]
         public void Post([FromBody] MenuItem value)
         {
-            value.Id = _context.MenuItems.AsEnumerable().Last().Id + 1;
+            value.MenuItemId = _context.MenuItems.AsEnumerable().Last().MenuItemId + 1;
             _context.MenuItems.Add(value);
             _context.SaveChanges();
         }
@@ -60,7 +60,7 @@ namespace Restaurants.Controllers
         [HttpPut("{id}")]
         public void Put(int id, [FromBody] MenuItem value)
         {
-            MenuItem mi = _context.MenuItems.Where(m => m.Id == id).FirstOrDefault(); // find menuItem by ID
+            MenuItem mi = _context.MenuItems.Where(m => m.MenuItemId == id).FirstOrDefault(); // find menuItem by ID
 
             if (mi!=null)
             {
