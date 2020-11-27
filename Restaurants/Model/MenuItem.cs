@@ -15,9 +15,5 @@ namespace Restaurants.Model
         public string Name { get; set; }
         public double Price { get; set; }
 
-        public List<MenuReservation> ReservationList { get; set; }
-
-
-
     }
 }
