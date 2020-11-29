@@ -24,7 +24,7 @@ namespace Restaurants.Controllers
 
         // GET: api/Rservations
         [HttpGet]
-        public IEnumerable<Reservation> Get()
+        public IEnumerable<ReservationViewModel> Get()
         {
             _logger.LogInformation("The Get MenuItem was invoked!");
             /*
@@ -33,35 +33,150 @@ namespace Restaurants.Controllers
            _logger.LogError("This is Error");
            _logger.LogCritical("This is something critical!!!");
           */
-            return _context.Reservations.ToList();
+            
+
+            List<ReservationViewModel> list = _context
+
+              .MenuReservation
+
+              .Select(r => r.Reservation)
+
+              .Distinct()
+
+              .Select(r => new ReservationViewModel
+              {
+
+                  Name = r.Name,
+
+                  Date = r.Date,
+
+                  MenuItems = _context
+
+                      .MenuReservation
+
+                      .Where(rmi => rmi.ReservationId == r.ReservationId)
+
+                      .Select(rmi => rmi.MenuItem)
+
+                      .ToList()
+
+              })
+
+              .ToList();
+
+            return (IEnumerable<ReservationViewModel>)list;
         }
 
         // GET: api/Reservations/5
         [HttpGet("{id}")]
-        public Reservation Get(int id)
+        public ReservationViewModel Get(int id)
         {
-            return _context.Reservations.Find(id);
+            var result = _context
+
+             .MenuReservation
+
+             .Select(r => r.Reservation)
+
+             .Distinct()
+             .Where(r => r.ReservationId == id)
+
+             .Select(r => new ReservationViewModel
+             {
+
+                 Name = r.Name,
+
+                 Date = r.Date,
+
+                 MenuItems = _context
+
+                     .MenuReservation
+
+                     .Where(rmi => rmi.ReservationId == r.ReservationId)
+
+                     .Select(rmi => rmi.MenuItem)
+
+                     .ToList()
+
+             });
+
+            return (ReservationViewModel)result;
         }
 
         // POST: api/Reservations
         [HttpPost]
-        public void Post([FromBody] Reservation value)
+        public void Post([FromBody] ReservationViewModel value)
         {
-            value.ReservationId = _context.Reservations.AsEnumerable().Last().ReservationId + 1;
-            _context.Reservations.Add(value);
-            _context.SaveChanges();
+            try
+            {
+                //add new reservation
+                var lastId =  _context.Reservations.AsEnumerable().Last().ReservationId + 1;
+                var newReservation = new Reservation
+                {
+                    ReservationId = lastId,
+                    Name = value.Name,
+                    Date = value.Date
+                };
+                _context.Reservations.Add(newReservation);
+                
+                //add a list of items to the new reservation bridge relations
+                for (int i = 0; i < value.MenuItems.Count(); i++)
+                {
+                    
+                    var item = new MenuReservation
+                    {
+                        ID = _context.MenuReservation.AsEnumerable().Last().ID + 1,
+                        ReservationId = newReservation.ReservationId,
+                        MenuId = value.MenuItems[i].MenuId
+                    };
+                    _context.MenuReservation.Add(item);
+                    
+                }
+                
+                _context.SaveChanges();
+            }
+            catch (Exception ex) {
+                // ex.Message;
+                _logger.LogError(ex.Message);
+            }
+           
         }
 
         // PUT: api/Reservations/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] Reservation value)
+        public void Put(int id, [FromBody] ReservationViewModel value)
         {
-            Reservation re = _context.Reservations.Where(r => r.ReservationId == id).FirstOrDefault(); // find reservation by ID
+            ReservationViewModel result = (ReservationViewModel)_context
 
-            if (re != null)
+            .MenuReservation
+
+            .Select(r => r.Reservation)
+
+            .Distinct()
+            .Where(r => r.ReservationId == id)
+
+            .Select(r => new ReservationViewModel
             {
-                re.Name = value.Name;
-                re.Date = value.Date;
+
+                Name = r.Name,
+
+                Date = r.Date,
+
+                MenuItems = _context
+
+                    .MenuReservation
+
+                    .Where(rmi => rmi.ReservationId == r.ReservationId)
+
+                    .Select(rmi => rmi.MenuItem)
+
+                    .ToList()
+
+            });
+
+            if (result != null)
+            {
+                result.Name = value.Name;
+                result.Date = value.Date;
                 _context.SaveChanges();
 
             }
@@ -71,9 +186,12 @@ namespace Restaurants.Controllers
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
+            //TBD > implement the deletion of reservation and deletion of the coresponding menuitems
+            
             Reservation re = _context.Reservations.Find(id);   //find reservation by ID
             _context.Reservations.Remove(re);
             _context.SaveChanges();
+            
         }
     
 

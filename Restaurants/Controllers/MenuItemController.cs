@@ -51,7 +51,7 @@ namespace Restaurants.Controllers
         [HttpPost]
         public void Post([FromBody] MenuItem value)
         {
-            value.MenuItemId = _context.MenuItems.AsEnumerable().Last().MenuItemId + 1;
+            value.MenuId = _context.MenuItems.AsEnumerable().Last().MenuId + 1;
             _context.MenuItems.Add(value);
             _context.SaveChanges();
         }
@@ -60,7 +60,7 @@ namespace Restaurants.Controllers
         [HttpPut("{id}")]
         public void Put(int id, [FromBody] MenuItem value)
         {
-            MenuItem mi = _context.MenuItems.Where(m => m.MenuItemId == id).FirstOrDefault(); // find menuItem by ID
+            MenuItem mi = _context.MenuItems.Where(m => m.MenuId == id).FirstOrDefault(); // find menuItem by ID
 
             if (mi!=null)
             {
