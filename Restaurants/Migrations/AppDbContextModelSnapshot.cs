@@ -19,7 +19,7 @@ namespace Restaurants.Migrations
 
             modelBuilder.Entity("Restaurants.Model.MenuItem", b =>
                 {
-                    b.Property<int>("MenuItemId")
+                    b.Property<int>("MenuId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
@@ -29,7 +29,7 @@ namespace Restaurants.Migrations
                     b.Property<double>("Price")
                         .HasColumnType("double");
 
-                    b.HasKey("MenuItemId");
+                    b.HasKey("MenuId");
 
                     b.ToTable("MenuItems");
                 });
@@ -40,7 +40,10 @@ namespace Restaurants.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("MenuItemId")
+                    b.Property<int>("MenuId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MenuItemMenuId")
                         .HasColumnType("int");
 
                     b.Property<int>("ReservationId")
@@ -48,7 +51,7 @@ namespace Restaurants.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("MenuItemId");
+                    b.HasIndex("MenuItemMenuId");
 
                     b.HasIndex("ReservationId");
 
@@ -75,13 +78,11 @@ namespace Restaurants.Migrations
             modelBuilder.Entity("Restaurants.Model.MenuReservation", b =>
                 {
                     b.HasOne("Restaurants.Model.MenuItem", "MenuItem")
-                        .WithMany("ReservationList")
-                        .HasForeignKey("MenuItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .WithMany()
+                        .HasForeignKey("MenuItemMenuId");
 
                     b.HasOne("Restaurants.Model.Reservation", "Reservation")
-                        .WithMany("MenuItemList")
+                        .WithMany()
                         .HasForeignKey("ReservationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
