@@ -33,7 +33,7 @@ namespace Restaurants.Controllers
            _logger.LogError("This is Error");
            _logger.LogCritical("This is something critical!!!");
           */
-            
+            //return _context.Reservations.ToList();
 
             List<ReservationViewModel> list = _context
 
@@ -97,7 +97,8 @@ namespace Restaurants.Controllers
 
                      .ToList()
 
-             });
+             })
+             .FirstOrDefault();
 
             return (ReservationViewModel)result;
         }
@@ -117,21 +118,31 @@ namespace Restaurants.Controllers
                     Date = value.Date
                 };
                 _context.Reservations.Add(newReservation);
-                
+
                 //add a list of items to the new reservation bridge relations
-                for (int i = 0; i < value.MenuItems.Count(); i++)
+                //for (int i = 0; i < value.MenuItems.Count(); i++)
+                //{
+
+                //    var item = new MenuReservation
+                //    {
+                //        ID = _context.MenuReservation.AsEnumerable().Last().ID + 1,
+                //        ReservationId = newReservation.ReservationId,
+                //        MenuId = value.MenuItems[i].MenuId
+                //    };
+                //    _context.MenuReservation.Add(item);
+
+                //}
+
+                foreach (MenuItem mi in value.MenuItems)
                 {
-                    
-                    var item = new MenuReservation
+                    MenuReservation rmi = new MenuReservation
                     {
-                        ID = _context.MenuReservation.AsEnumerable().Last().ID + 1,
-                        ReservationId = newReservation.ReservationId,
-                        MenuId = value.MenuItems[i].MenuId
+                        MenuId = mi.MenuId,
+                        ReservationId = newReservation.ReservationId
                     };
-                    _context.MenuReservation.Add(item);
-                    
+                    _context.MenuReservation.Add(rmi);
                 }
-                
+
                 _context.SaveChanges();
             }
             catch (Exception ex) {
@@ -145,6 +156,7 @@ namespace Restaurants.Controllers
         [HttpPut("{id}")]
         public void Put(int id, [FromBody] ReservationViewModel value)
         {
+            /*
             ReservationViewModel result = (ReservationViewModel)_context
 
             .MenuReservation
@@ -180,6 +192,33 @@ namespace Restaurants.Controllers
                 _context.SaveChanges();
 
             }
+            */
+            Reservation reservation = _context
+                .Reservations
+                .Where(r => r.ReservationId == id)
+                .FirstOrDefault();
+
+            if (reservation != null)
+            {
+                reservation.Name = value.Name;
+                reservation.Date = value.Date;
+
+                var rangeMI = _context.MenuReservation
+                    .Where(rmi => rmi.ReservationId == id).ToList();
+                _context.MenuReservation.RemoveRange(rangeMI);
+
+                foreach (MenuItem mi in value.MenuItems)
+                {
+                    MenuReservation rmi = new MenuReservation
+                    {
+                        MenuId = mi.MenuId,
+                        ReservationId = id
+                    };
+                    _context.MenuReservation.Add(rmi);
+                }
+
+                _context.SaveChanges();
+            }
         }
 
         // DELETE: api/ApiWithActions/5
@@ -189,9 +228,19 @@ namespace Restaurants.Controllers
             //TBD > implement the deletion of reservation and deletion of the coresponding menuitems
             
             Reservation re = _context.Reservations.Find(id);   //find reservation by ID
-            _context.Reservations.Remove(re);
-            _context.SaveChanges();
-            
+
+            if (re !=null)
+            {
+                var rangeMI = _context.MenuReservation
+                    .Where(rmi => rmi.ReservationId == id).ToList();
+
+                _context.MenuReservation.RemoveRange(rangeMI);
+                _context.Reservations.Remove(re);
+                _context.SaveChanges();
+
+            }
+
+
         }
     
 
